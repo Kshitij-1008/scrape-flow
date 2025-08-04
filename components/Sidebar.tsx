@@ -81,8 +81,7 @@ export function MobileSidebar() {
                     </SheetTrigger>
                     <SheetContent className="w-[400px] sm:w-[540px] space-y-4" side={"left"}>
                         <Logo />
-                        <div className="flex flex-col gap-1">
-                            {" "}
+                        <div className="flex flex-col gap-1"> 
                             {routes.map((route) => (
                                 <Link key= {route.href} href={route.href}
                                 className={buttonVariants({
