@@ -35,8 +35,8 @@ function DesktopSidebar() {
 
     const pathname = usePathname();
     const activeRoute = routes.find(
-        route => route.href.length > 0 && 
-        pathname.includes(route.href)) || routes[0];
+        route => route.href.length > 0 && pathname.includes(route.href)) || routes[0];
+
 
     return (
         <div className="hidden relative md:block min-w-[280px] 
