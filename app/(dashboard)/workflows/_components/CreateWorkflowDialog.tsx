@@ -17,6 +17,7 @@ import { toast } from "sonner";
 function CreateWorkflowDialog({ triggerText } : { triggerText?: string }) {
     
     const [isOpen, setOpen] = useState(false);
+    
     const form = useForm<createWorkflowSchemaType>({
         resolver: zodResolver(createWorkflowSchema),
         defaultValues: {}
