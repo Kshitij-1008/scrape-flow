@@ -1,12 +1,23 @@
 "use client";
 import { Workflow } from "@/lib/generated/prisma";
-import { Background, BackgroundVariant, Controls, ReactFlow, useEdgesState, useNodesState } from "@xyflow/react";
+import { CreateFlowNode } from "@/lib/workflow/createFlowNode";
+import { TaskType } from "@/types/task";
+import { 
+    Background, 
+    BackgroundVariant, 
+    Controls, 
+    ReactFlow, 
+    useEdgesState, 
+    useNodesState 
+} from "@xyflow/react";
 
 import "@xyflow/react/dist/style.css";
 
 function FlowEditor({ workflow } : {workflow: Workflow}) {
 
-    const [nodes, setNodes, onNodesChange] = useNodesState([])
+    const [nodes, setNodes, onNodesChange] = useNodesState([
+        CreateFlowNode(TaskType.LAUNCH_BROWSER)
+    ])
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
     return (
