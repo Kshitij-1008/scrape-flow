@@ -20,6 +20,7 @@ import NodeComponent from "./nodes/NodeComponent";
 import React, { useCallback, useEffect } from "react";
 import { AppNode } from "@/types/appNode";
 import DeletableEdge from "./edges/DeletableEdge";
+import { TaskRegistry } from "@/lib/workflow/task/registry";
 
 const nodeTypes = {
     FlowScrapeNode: NodeComponent,
@@ -36,7 +37,7 @@ function FlowEditor({ workflow } : {workflow: Workflow}) {
 
     const [nodes, setNodes, onNodesChange] = useNodesState<AppNode>([])
     const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
-    const { setViewport, screenToFlowPosition } = useReactFlow();
+    const { setViewport, screenToFlowPosition, updateNodeData } = useReactFlow();
 
     // Ensures that the inputs stay after refresh
     useEffect(() => {
@@ -74,8 +75,51 @@ function FlowEditor({ workflow } : {workflow: Workflow}) {
     }, [setNodes, screenToFlowPosition]);
 
     const onConnect = useCallback((connection: Connection) => {
-        setEdges((prev_edges) => addEdge({...connection, animated: true}, prev_edges))
-    }, [setEdges])
+        setEdges((prev_edges) => addEdge({...connection, animated: true}, prev_edges));
+        if (!connection.targetHandle) return;
+
+        // Remove input value if it's been inputted by the user
+        const node = nodes.find((node) => node.id === connection.target);
+        if (!node) return;
+        const nodeInputs = node.data.inputs;
+        // delete nodeInputs[connection.targetHandle]
+        // updateNodeData(node.id, {inputs: nodeInputs});
+        updateNodeData(node.id, {
+            inputs: {
+                ...nodeInputs,
+                [connection.targetHandle]: ""
+            },
+        });
+    }, [setEdges, nodes, updateNodeData]);
+
+    const isValidConnection = useCallback((connection: Edge | Connection) => {
+        // 1. No self-connection allowed
+        if (connection.source === connection.target) {return false};
+
+        // 2. Same TaskParameterType connection
+        const source_node = nodes.find((node) => node.id === connection.source);
+        const target_node = nodes.find((node) => node.id === connection.target);
+        if (!source_node || !target_node) {
+            console.error("Source or target node not found")
+            return false
+        };
+
+        const source_task = TaskRegistry[source_node.data.type]
+        const target_task = TaskRegistry[target_node.data.type]
+        
+        const output = source_task.outputs.find((output) => output.name === connection.sourceHandle);
+        const input = target_task.inputs.find((input) => input.name === connection.targetHandle);
+
+        if (output?.type !== input?.type) {
+            console.error("Invalid connection: Type-mismatch detected")
+            return false
+        };
+
+        return true;
+    }, [nodes])
+
+    console.log("@Nodes", nodes);
+    console.log("@Edges", edges);
 
     return (
         <main className="h-full w-full">
@@ -93,6 +137,7 @@ function FlowEditor({ workflow } : {workflow: Workflow}) {
               onDragOver={onDragOver}
               onDrop={onDrop}
               onConnect={onConnect}
+              isValidConnection={isValidConnection}
             >
                 <Controls position="top-left" fitViewOptions={fitViewOptions} />
                 <Background variant={BackgroundVariant.Dots} gap={12} size={1}/>

@@ -16,4 +16,5 @@ export interface ParamProps {
     param: TaskParameter;
     value: string;
     updateNodeParamValue: (newValue: string) => void;
+    disabled?: boolean;
 }
