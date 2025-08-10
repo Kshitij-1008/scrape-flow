@@ -13,6 +13,17 @@ export const PageToHtmlTask = {
             name: "Web Page",
             type: TaskParameterType.BROWSER_INSTANCE,
             required: true,
+            hideHandle: false,
         },
+    ],
+    outputs: [
+        {
+            name: "HTML",
+            type: TaskParameterType.STRING
+        },
+        {
+            name: "Web Page",
+            type: TaskParameterType.BROWSER_INSTANCE
+        }
     ],
 };
