@@ -19,10 +19,15 @@ import "@xyflow/react/dist/style.css";
 import NodeComponent from "./nodes/NodeComponent";
 import React, { useCallback, useEffect } from "react";
 import { AppNode } from "@/types/appNode";
+import DeletableEdge from "./edges/DeletableEdge";
 
 const nodeTypes = {
     FlowScrapeNode: NodeComponent,
 }; // Ensures that custom node UI can be implemented by marking the created flow nodes a certain type
+
+const edgeTypes = {
+    default: DeletableEdge,
+}
 
 const snapGrid: [number, number] = [50, 50]; //To constrain the motion of the node, makes it easier to connect edges and nodes later on 
 const fitViewOptions = { padding: 1 }; // Centers upon refresh and this specific variable provides spacing around the workflow
@@ -80,6 +85,7 @@ function FlowEditor({ workflow } : {workflow: Workflow}) {
               onNodesChange={onNodesChange}
               onEdgesChange={onEdgesChange}
               nodeTypes={nodeTypes}
+              edgeTypes={edgeTypes}
               snapToGrid={true}
               snapGrid={snapGrid}
               fitViewOptions={fitViewOptions}
