@@ -7,7 +7,7 @@ import { toast } from "sonner";
 
 const useExecutionPlan = () => {
     const { toObject } = useReactFlow();
-    const {setInvalidInputs, clearErrors} = useFlowValidation();
+    const { setInvalidInputs, clearErrors} = useFlowValidation();
 
     const handleError = useCallback((error: any) => {
         switch (error.type) {
@@ -30,6 +30,7 @@ const useExecutionPlan = () => {
 
         if (error) {
             handleError(error);
+            return null; //invalidInputs
         }
 
         clearErrors();

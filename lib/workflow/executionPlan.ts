@@ -1,6 +1,6 @@
 import { AppNode, AppNodeMissingInputs } from "@/types/appNode";
 import { WorkflowExecutionPlan, WorkflowExecutionPlanPhase } from "@/types/workflow";
-import { Edge, getIncomers } from "@xyflow/react";
+import { Edge } from "@xyflow/react";
 import { TaskRegistry } from "./task/registry";
 
 export enum FlowToExecutionPlanValidationError {
@@ -62,7 +62,7 @@ export function FlowToExecutionPlan( nodes: AppNode[], edges: Edge[]) : FlowToEx
 
             const invalidInputs = getInvalidInputs(currentNode, edges, planned);
             if (invalidInputs.length > 0) {
-                const incomers = getIncomers(currentNode, nodes, edges); //Specifies dependencies of the currentNode (which nodes are connected to currentNode as source of an edge)
+                const incomers = getIncomers(currentNode, nodes, edges); //To be specified customly because it's not a valid function in backend.
                 if (incomers.every(incomer => planned.has(incomer.id))) {
                     // If all incomers are planned and there are still invalid inputs, 
                     // this means that this particular node has an invalid input
@@ -134,4 +134,22 @@ function getInvalidInputs(node: AppNode, edges: Edge[], planned: Set<string>) {
     }
 
     return invalidInputs;
+};
+
+function getIncomers(node: AppNode, nodes: AppNode[], edges: Edge[]) {
+    /** It's a util designed to get the nodes, if any, that are connected to the current node 
+    // as a source node of an edge; basically to get the nodes which feed the inputs of the current node*/
+
+    if (!node.id) {
+        return []
+    };
+
+    const incomerIds = new Set();
+    edges.forEach((edge) => {
+        if (edge.target === node.id) {
+            incomerIds.add(edge.source)
+        }
+    });
+
+    return nodes.filter((node) => incomerIds.has(node.id));
 }
