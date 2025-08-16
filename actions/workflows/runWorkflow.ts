@@ -1,9 +1,12 @@
 "use server";
 import prisma from "@/lib/prisma";
+import { ExecuteWorkflow } from "@/lib/workflow/executeWorkflow";
 import { FlowToExecutionPlan } from "@/lib/workflow/executionPlan";
 import { TaskRegistry } from "@/lib/workflow/task/registry";
 import { ExecutionPhaseStatus, WorkflowExecutionPlan, WorkflowExecutionStatus, WorkflowExecutionTrigger } from "@/types/workflow";
 import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
+
 
  
 
@@ -34,6 +37,49 @@ export async function RunWorkflow(form : {workflowId: string, flowDefinition?: s
     if (!flowDefinition) {
         throw new Error("Flow Definition is not defined");
     };
+
+    // To just re-direct in case the flow definition is the same
+    const existingExecution = await prisma.workflowExecution.findFirst({
+        where: {
+            workflowId: workflowId,
+            userId: userId, 
+            status: WorkflowExecutionStatus.PENDING
+        },
+        orderBy: {
+            startedAt: "desc",
+        },
+        include: {
+            phases: true,
+        },
+    });
+
+    if (existingExecution) {
+        const flow = JSON.parse(flowDefinition);
+        const result = FlowToExecutionPlan(flow.nodes, flow.edges);
+        if (result.error) {throw new Error("Flow Definition is not valid")};
+
+        if (result.executionPlan) {
+            const currentPhases = result.executionPlan.flatMap((phase) => 
+                phase.nodes.map(node => ({
+                    number: phase.phase,
+                    node: JSON.stringify(node),
+                    name: TaskRegistry[node.data.type].label,
+                }))
+            );
+
+            const existingPhases = existingExecution.phases.map((phase) => ({
+                number: phase.number,
+                node: phase.node,
+                name: phase.name
+            }));
+
+            const phasesMatch = JSON.stringify(currentPhases) === JSON.stringify(existingPhases);
+            if (phasesMatch) {
+                ExecuteWorkflow(existingExecution.id);
+                redirect(`/workflow/runs/${workflowId}/${existingExecution.id}`);
+            }
+        }
+    }
 
     const flow = JSON.parse(flowDefinition);
     //Generating execution plan in backend (can't use the hook thus we made a separate function beforehand in a different file)
@@ -78,5 +124,8 @@ export async function RunWorkflow(form : {workflowId: string, flowDefinition?: s
 
     if (!execution) {
         throw new Error("Workflow execution not created")
-    }
+    };
+
+    ExecuteWorkflow(execution.id);
+    redirect(`/workflow/runs/${workflowId}/${execution.id}`);
 }
