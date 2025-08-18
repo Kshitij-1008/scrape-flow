@@ -59,7 +59,7 @@ model ExecutionPhase {
   startedAt DateTime?
   completedAt DateTime?
   inputs String?
-  ouputs String?
+  outputs String?
 
   creditsConsumed Int?
 

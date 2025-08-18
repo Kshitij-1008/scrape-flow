@@ -37,7 +37,6 @@ function DesktopSidebar() {
     const activeRoute = routes.find(
         route => route.href.length > 0 && pathname.includes(route.href)) || routes[0];
 
-
     return (
         <div className="hidden relative md:block min-w-[280px] 
         max-w-[280px] h-screen overflow-hidden w-full bg-primary/5 dark:bg-secondary/30 
@@ -48,7 +47,7 @@ function DesktopSidebar() {
             <div className="p-2">TODO Credits</div>
             <div className="flex flex-col pad-2">
                 {routes.map(route => (
-                    <Link key={route.href} href={route.href}
+                    <Link key={route.href} href={`/${route.href}`}
                     className={
                         buttonVariants({
                             variant: activeRoute.href === route.href ?"sidebarActiveItem" :"sidebarItem",
