@@ -8,16 +8,17 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
 
- 
-
-export async function RunWorkflow(form : {workflowId: string, flowDefinition?: string}) {
+export async function RunWorkflow(form : {
+    workflowId: string, 
+    flowDefinition?: string,
+}) {
 
     const { userId } = auth();
     if (!userId) {
         throw new Error("Unauthenticated");
     };
 
-    const { workflowId, flowDefinition} = form;
+    const { workflowId, flowDefinition } = form;
     if (!workflowId) {
         throw new Error("Workflow ID is required");
     };
@@ -115,6 +116,7 @@ export async function RunWorkflow(form : {workflowId: string, flowDefinition?: s
                     });
                 }), //flatMap because each phase contains the nodes in a array
             },
+            definition: flowDefinition,
         },
         select: {
             id: true,
