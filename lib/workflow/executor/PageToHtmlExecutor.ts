@@ -6,6 +6,7 @@ export async function PageToHtmlExecutor(
 ) : Promise<boolean> {
     try {
         const html = await environment.getPage()!.content();
+        environment.log.info("Successfully received the HTML");
         environment.setOutput("HTML", html);
         return true;
     } catch (error : any) {
